@@ -55,10 +55,11 @@ for j in $(find -name \*.jar); do
     fi
 done
 # disable gpg plugin
-%pom_remove_plugin :maven-gpg-plugin
+#%pom_remove_plugin :maven-gpg-plugin
+%define mvn_opts -Dgpg.skip=true -Dproject.build.sourceEncoding=UTF-8
  
 %build
-mvn-rpmbuild package javadoc:aggregate
+mvn-rpmbuild package javadoc:aggregate %mvn_opts
 
 %install
 
@@ -73,10 +74,9 @@ install -pm 644 pom.xml  \
         $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 
 %add_maven_depmap JPP-%{name}.pom %{name}.jar
-%pom_xpath_inject "pom:project" "<properties><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding></properties>"
 
 %check
-mvn-rpmbuild verify
+mvn-rpmbuild verify %mvn_opts
 
 %files
 %{_mavenpomdir}/JPP-%{name}.pom
