@@ -5,7 +5,9 @@
 %endif
 
 %define shortname common
+
 %define submodule_util zanata-%{shortname}-util
+%define submodule_po zanata-adapter-po
 
 Name:           zanata-%{shortname}
 Version:        2.1.1
@@ -38,14 +40,20 @@ BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
 BuildRequires:  zanata-api
+BuildRequires:  hamcrest12
+BuildRequires:  slf4j 
+BuildRequires:  testng 
+
+# dependencies in zanata-common-util
 BuildRequires:  jackson
 BuildRequires:  guava
 BuildRequires:  apache-commons-io
 BuildRequires:  apache-commons-codec
-BuildRequires:  hamcrest12
-BuildRequires:  slf4j 
 BuildRequires:  junit     
-BuildRequires:  testng           
+
+# dependencies in zanata-adaptor-po
+BuildRequires:  jgettext
+BuildRequires:  apache-commons-lang
 
 Requires:       jpackage-utils
 Requires:       java
@@ -66,7 +74,6 @@ This package contains the API documentation for %{shortname}.
 %prep
 %setup -q -n %{name}-%{shortname}-%{version}
 # Disables child-module-1, a submodule of the main pom.xml file
-%pom_disable_module zanata-adapter-po
 %pom_disable_module zanata-adapter-properties
 %pom_disable_module zanata-adapter-xliff
 %pom_disable_module zanata-adapter-glossary
@@ -90,17 +97,21 @@ mvn-rpmbuild package javadoc:aggregate
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 
 cp -p %{submodule_util}/target/%{submodule_util}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_util}.jar
+cp -p %{submodule_po}/target/%{submodule_po}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_po}.jar
 
 mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_util}
+cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_po}
 
 install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -pm 644 pom.xml  \
         $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 install -pm 644 %{submodule_util}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_util}.pom
+install -pm 644 %{submodule_po}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_po}.pom
 
 %add_maven_depmap JPP-%{name}.pom
 %add_maven_depmap JPP-%{submodule_util}.pom %{submodule_util}.jar
+%add_maven_depmap JPP-%{submodule_po}.pom %{submodule_po}.jar
 
 %check
 mvn-rpmbuild verify
@@ -108,12 +119,15 @@ mvn-rpmbuild verify
 %files
 %{_mavenpomdir}/JPP-%{name}.pom
 %{_mavenpomdir}/JPP-%{submodule_util}.pom
+%{_mavenpomdir}/JPP-%{submodule_po}.pom
 %{_mavendepmapfragdir}/%{name}
 %{_javadir}/%{submodule_util}.jar
+%{_javadir}/%{submodule_po}.jar
 %doc
 
 %files javadoc
 %{_javadocdir}/%{submodule_util}
+%{_javadocdir}/%{submodule_po}
 
 %changelog
 * Mon Feb 11 2013 Patrick Huang <pahuang@redhat.com> 2.1.1-1
