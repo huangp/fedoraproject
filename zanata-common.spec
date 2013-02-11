@@ -10,6 +10,7 @@
 %define submodule_po zanata-adapter-po
 %define submodule_properties zanata-adapter-properties
 %define submodule_xliff zanata-adapter-xliff
+%define submodule_glossary zanata-adapter-glossary
 
 Name:           zanata-%{shortname}
 Version:        2.1.1
@@ -62,6 +63,9 @@ BuildRequires:  openprops
 
 # dependencies in zanata-adapter-xliff (no extra)
 
+# dependencies in zanata-adapter-glossary
+BuildRequires:  opencsv
+
 Requires:       jpackage-utils
 Requires:       java
 
@@ -76,7 +80,8 @@ Requires:       jpackage-utils
 %description javadoc
 This package contains the API documentation for %{shortname}.
 This includes submodules:
-%{submodule_util}, %{submodule_po}, %{submodule_properties}, %{submodule_xliff}
+%{submodule_util}, %{submodule_po}, %{submodule_properties}, %{submodule_xliff} 
+and %{submodule_glossary}
 
 %prep
 # TODO change back to version
@@ -85,7 +90,6 @@ This includes submodules:
 # Disables child-module-1, a submodule of the main pom.xml file
 # Removes dependency
 # %pom_remove_dep org.infinitest:infinitest %{submodule_properties}
-%pom_disable_module zanata-adapter-glossary
 
 
 
@@ -111,12 +115,14 @@ cp -p %{submodule_util}/target/%{submodule_util}*-%{ver}.jar $RPM_BUILD_ROOT%{_j
 cp -p %{submodule_po}/target/%{submodule_po}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_po}.jar
 cp -p %{submodule_properties}/target/%{submodule_properties}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_properties}.jar
 cp -p %{submodule_xliff}/target/%{submodule_xliff}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_xliff}.jar
+cp -p %{submodule_glossary}/target/%{submodule_glossary}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_glossary}.jar
 
 mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_util}
 cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_po}
 cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_properties}
 cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_xliff}
+cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_glossary}
 
 install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -pm 644 pom.xml  \
@@ -125,12 +131,14 @@ install -pm 644 %{submodule_util}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{sub
 install -pm 644 %{submodule_po}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_po}.pom
 install -pm 644 %{submodule_properties}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_properties}.pom
 install -pm 644 %{submodule_xliff}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_xliff}.pom
+install -pm 644 %{submodule_glossary}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_glossary}.pom
 
 %add_maven_depmap JPP-%{name}.pom
 %add_maven_depmap JPP-%{submodule_util}.pom %{submodule_util}.jar
 %add_maven_depmap JPP-%{submodule_po}.pom %{submodule_po}.jar
 %add_maven_depmap JPP-%{submodule_properties}.pom %{submodule_properties}.jar
 %add_maven_depmap JPP-%{submodule_xliff}.pom %{submodule_xliff}.jar
+%add_maven_depmap JPP-%{submodule_glossary}.pom %{submodule_glossary}.jar
 
 %check
 mvn-rpmbuild verify
@@ -141,11 +149,13 @@ mvn-rpmbuild verify
 %{_mavenpomdir}/JPP-%{submodule_po}.pom
 %{_mavenpomdir}/JPP-%{submodule_properties}.pom
 %{_mavenpomdir}/JPP-%{submodule_xliff}.pom
+%{_mavenpomdir}/JPP-%{submodule_glossary}.pom
 %{_mavendepmapfragdir}/%{name}
 %{_javadir}/%{submodule_util}.jar
 %{_javadir}/%{submodule_po}.jar
 %{_javadir}/%{submodule_properties}.jar
 %{_javadir}/%{submodule_xliff}.jar
+%{_javadir}/%{submodule_glossary}.jar
 %doc
 
 %files javadoc
@@ -153,6 +163,7 @@ mvn-rpmbuild verify
 %{_javadocdir}/%{submodule_po}
 %{_javadocdir}/%{submodule_properties}
 %{_javadocdir}/%{submodule_xliff}
+%{_javadocdir}/%{submodule_glossary}
 
 %changelog
 * Mon Feb 11 2013 Patrick Huang <pahuang@redhat.com> 2.1.1-1
