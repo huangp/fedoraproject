@@ -42,29 +42,29 @@ BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
-BuildRequires:  zanata-api
-BuildRequires:  hamcrest12
-BuildRequires:  slf4j 
+Requires:       zanata-api
+Requires:       slf4j 
 BuildRequires:  testng 
+BuildRequires:  hamcrest12
 
 # dependencies in zanata-common-util
-BuildRequires:  jackson
-BuildRequires:  guava
-BuildRequires:  apache-commons-io
-BuildRequires:  apache-commons-codec
+Requires:       jackson
+Requires:       guava
+Requires:       apache-commons-io
+Requires:       apache-commons-codec
 BuildRequires:  junit     
 
 # dependencies in zanata-adapter-po
-BuildRequires:  jgettext
-BuildRequires:  apache-commons-lang
+Requires:       jgettext
+Requires:       apache-commons-lang
 
 # dependencies in zanata-adapter-properties
-BuildRequires:  openprops
+Requires:       openprops
 
 # dependencies in zanata-adapter-xliff (no extra)
 
 # dependencies in zanata-adapter-glossary
-BuildRequires:  opencsv
+Requires:       opencsv
 
 Requires:       jpackage-utils
 Requires:       java

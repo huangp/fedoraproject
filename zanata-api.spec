@@ -37,15 +37,17 @@ BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
-BuildRequires:  hibernate-validator
-BuildRequires:  jackson
-BuildRequires:  apache-commons-lang
-BuildRequires:  apache-commons-codec
 BuildRequires:  hamcrest12
 BuildRequires:  testng
-BuildRequires:  resteasy
-BuildRequires:  slf4j
-BuildRequires:  jboss-annotations-1.1-api
+
+# required lib at runtime
+Requires:       hibernate-validator
+Requires:       jackson
+Requires:       apache-commons-lang
+Requires:       apache-commons-codec
+Requires:       resteasy
+Requires:       slf4j
+Requires:       jboss-annotations-1.1-api
 
 Requires:       jpackage-utils
 Requires:       java
