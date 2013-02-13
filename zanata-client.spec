@@ -105,10 +105,24 @@ This includes submodules:
 %build
 
 # -Dmaven.local.debug=true
-mvn-rpmbuild install javadoc:aggregate -DignoreNonCompile
+# TODO remove skip test
+mvn-rpmbuild package javadoc:aggregate -DskipTests
 
+# local offline maven can not resolve each module, 
+# we have to disable our own module and generate classpath one by one
+cd %{submodule_rest}
+mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/%{submodule_rest}-classpath.txt
+
+cd ..
+%pom_remove_dep org.zanata:%{submodule_rest} %{submodule_commands}
+cd %{submodule_commands}
+mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/%{submodule_commands}-classpath.txt
+
+cd ..
+%pom_remove_dep org.zanata:%{submodule_commands} %{submodule_cli}
 cd %{submodule_cli}
-mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/classpath.txt
+mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/%{submodule_cli}-classpath.txt
+
 
 %install
 
@@ -119,11 +133,6 @@ mkdir -p $RPM_BUILD_ROOT%{_javadir}
 cp -p %{submodule_rest}/target/%{submodule_rest}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_rest}.jar
 cp -p %{submodule_commands}/target/%{submodule_commands}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_commands}.jar
 cp -p %{submodule_cli}/target/%{submodule_cli}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_cli}.jar
-
-echo *****************************************
-cp=$(cat %{submodule_cli}/target/classpath.txt)
-echo $cp
-echo *****************************************
 
 mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_rest}
@@ -136,24 +145,68 @@ install -pm 644 pom.xml  \
 install -pm 644 %{submodule_rest}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_rest}.pom
 install -pm 644 %{submodule_commands}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_commands}.pom
 install -pm 644 %{submodule_cli}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_cli}.pom
-install -pm 644 %{buildroot}/classpath.txt
 
 %add_maven_depmap JPP-%{name}.pom
 %add_maven_depmap JPP-%{submodule_rest}.pom %{submodule_rest}.jar
 %add_maven_depmap JPP-%{submodule_commands}.pom %{submodule_commands}.jar
 %add_maven_depmap JPP-%{submodule_cli}.pom %{submodule_cli}.jar
 
+rest_cp=$(cat %{submodule_rest}/target/%{submodule_rest}-classpath.txt)
+commands_cp=$(cat %{submodule_commands}/target/%{submodule_commands}-classpath.txt)
+cli_cp=$(cat %{submodule_cli}/target/%{submodule_cli}-classpath.txt)
+
+%define CLASSPATH $rest_cp:$commands_cp:$cli_cp
+
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+
+install -d -m 755 $RPM_BUILD_ROOT%{_bindir}
 # create wrapper script
 # %1    main class
 # %2    flags
 # %3    options
-# %4    jars (separated by ':')
+# %4    jars (separated by ':') can not be empty
 # %5    the name of script you wish to create
-# %6    whether to prefer a jre over a sdk when finding a jvm
+# %6    whether to prefer a jre over a sdk when finding a jvm                                                      
+#%jpackage_script org.zanata.client.ZanataClient "" "" "commons-lang" zanata-cli true
+############# copy from jpackage_script() ###########################
+
+cat > $RPM_BUILD_ROOT%{_bindir}/zanata-cli << ZANATA_CLI
+#!/bin/sh
+#
+# %{name} script
+# JPackage Project <http://www.jpackage.org/>
+
+# Source functions library
+. %{_javadir}-utils/java-functions
+
+# Source system prefs
+if [ -f %{_sysconfdir}/java/%{name}.conf ] ; then
+  . %{_sysconfdir}/java/%{name}.conf
+fi
+
+# Source user prefs
+if [ -f \$HOME/.%{name}rc ] ; then
+  . \$HOME/.%{name}rc
+fi
+
+# Configuration
+MAIN_CLASS=org.zanata.client.ZanataClient
+BASE_JARS="%{submodule_rest} %{submodule_commands} %{submodule_cli}"
+CLASSPATH=%{CLASSPATH}
+
+# Set parameters
+set_jvm
+# we have built CLASSPATH above
+set_classpath \$BASE_JARS
 
 
-#%jpackage_script org.zanata.client.ZanataClient "" "-cp=$cp" "" zanata-cli true
 
+# Let's start
+run "\$@"
+ZANATA_CLI
+
+chmod 755 $RPM_BUILD_ROOT%{_bindir}/zanata-cli
+#################################################################
 
 %files
 %{_mavenpomdir}/JPP-%{name}.pom
@@ -164,6 +217,7 @@ install -pm 644 %{buildroot}/classpath.txt
 %{_javadir}/%{submodule_rest}.jar
 %{_javadir}/%{submodule_commands}.jar
 %{_javadir}/%{submodule_cli}.jar
+%attr(0755,root,root) %{_bindir}/zanata-cli
 %doc
 
 %files javadoc
