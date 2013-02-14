@@ -42,28 +42,28 @@ BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
-BuildRequires:  slf4j 
+Requires:  slf4j 
 
 # dependencies in zanata-rest-client
-BuildRequires:  zanata-api
+Requires:  zanata-api
 BuildRequires:  junit
-BuildRequires:  resteasy
+Requires:  resteasy
 
 # dependencies in zanata-common-commands
-BuildRequires:  zanata-common
+Requires:  zanata-common
 BuildRequires:  mockito
-BuildRequires:  apache-commons-configuration
-BuildRequires:  log4j
-BuildRequires:  args4j
-BuildRequires:  openprops
-BuildRequires:  apache-commons-collections
-BuildRequires:  guava
+Requires:  apache-commons-configuration
+Requires:  log4j
+Requires:  args4j
+Requires:  openprops
+Requires:  apache-commons-collections
+Requires:  guava
 BuildRequires:  hamcrest12
-BuildRequires:  apache-commons-lang
-BuildRequires:  apache-commons-codec
-BuildRequires:  apache-commons-io
-BuildRequires:  opencsv
-BuildRequires:  ant
+Requires:  apache-commons-lang
+Requires:  apache-commons-codec
+Requires:  apache-commons-io
+Requires:  opencsv
+Requires:  ant
 
 # dependencies in zanata-cli
 BuildRequires:  %mvn_exec_plugin
@@ -161,15 +161,9 @@ mkdir -p $RPM_BUILD_ROOT%{_bindir}
 
 install -d -m 755 $RPM_BUILD_ROOT%{_bindir}
 # create wrapper script
-# %1    main class
-# %2    flags
-# %3    options
-# %4    jars (separated by ':') can not be empty
-# %5    the name of script you wish to create
-# %6    whether to prefer a jre over a sdk when finding a jvm                                                      
-#%jpackage_script org.zanata.client.ZanataClient "" "" "commons-lang" zanata-cli true
-############# copy from jpackage_script() ###########################
-
+# adapted from jpackage_script(). 
+# We build CLASSPATH at build time and the script won't be able to access it at runtime
+############# copied from jpackage_script() ###########################
 cat > $RPM_BUILD_ROOT%{_bindir}/zanata-cli << ZANATA_CLI
 #!/bin/sh
 #
@@ -191,15 +185,13 @@ fi
 
 # Configuration
 MAIN_CLASS=org.zanata.client.ZanataClient
-BASE_JARS="%{submodule_rest} %{submodule_commands} %{submodule_cli}"
+BASE_JARS="%{submodule_rest} %{submodule_commands} %{submodule_cli} slf4j/log4j12"
 CLASSPATH=%{CLASSPATH}
 
 # Set parameters
 set_jvm
 # we have built CLASSPATH above
 set_classpath \$BASE_JARS
-
-
 
 # Let's start
 run "\$@"
