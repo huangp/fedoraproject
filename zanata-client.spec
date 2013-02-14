@@ -17,7 +17,7 @@ Version:        2.0.1
 Release:        1%{?dist}
 Summary:        Zanata API modules
 
-Group:          Development/Libraries
+Group:          Development/Tools
 License:        LGPLv2
 URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version}.zip
@@ -106,7 +106,7 @@ This includes submodules:
 
 # -Dmaven.local.debug=true
 # TODO remove skip test
-mvn-rpmbuild package javadoc:aggregate -DskipTests
+mvn-rpmbuild package javadoc:aggregate
 
 # local offline maven can not resolve each module, 
 # we have to disable our own module and generate classpath one by one
@@ -199,6 +199,9 @@ ZANATA_CLI
 
 chmod 755 $RPM_BUILD_ROOT%{_bindir}/zanata-cli
 #################################################################
+
+%check
+mvn-rpmbuild verify
 
 %files
 %{_mavenpomdir}/JPP-%{name}.pom
