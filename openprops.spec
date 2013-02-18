@@ -1,13 +1,7 @@
-%if 0%{?fedora} > 18
-    %define mvnbuildRequires maven-local
-%else
-    %define mvnbuildRequires maven
-%endif
-
 Name:           openprops
 Version:        0.6
-Release:        3%{?dist}
-Summary:        A fork of java.util.Properties from OpenJDK
+Release:        4%{?dist}
+Summary:        An improved java.util.Properties from OpenJDK
 
 Group:          Development/Libraries
 License:        GPLv2 with exceptions
@@ -20,7 +14,7 @@ BuildRequires:  jpackage-utils
 
 BuildRequires:  java-devel
 
-BuildRequires:  %mvnbuildRequires
+BuildRequires:  maven-local
 
 BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-install-plugin
@@ -91,16 +85,18 @@ install -pm 644 pom.xml  \
 %check
 mvn-rpmbuild verify
 
-%files
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavendepmapfragdir}/%{name}
-%{_javadir}/%{name}.jar
-%doc README.txt
+%files -f .mfiles
+%doc README.txt COPYING.txt
 
 %files javadoc
 %{_javadocdir}/%{name}
+%doc COPYING.txt
+
 
 %changelog
+* Tue Feb 19 2013 Patrcik Huang <pahuang@redhat.com> 0.6-4
+- Add COPYING.txt into package and update summary and simplify file section
+
 * Thu Feb 7 2013 Patrick Huang <pahuang@redhat.com> 0.6-3
 - Update BuildRequires maven/maven-local depend on dist version
 
