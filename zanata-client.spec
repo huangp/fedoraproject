@@ -42,34 +42,36 @@ BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
-Requires:  slf4j 
+Requires:       slf4j 
 
 # dependencies in zanata-rest-client
-Requires:  zanata-api
+Requires:       zanata-api
 BuildRequires:  junit
-Requires:  resteasy
+Requires:       resteasy
 
 # dependencies in zanata-common-commands
-Requires:  zanata-common
+Requires:       zanata-common
 BuildRequires:  mockito
-Requires:  apache-commons-configuration
-Requires:  log4j
-Requires:  args4j
-Requires:  openprops
-Requires:  apache-commons-collections
-Requires:  guava
+Requires:       apache-commons-configuration
+Requires:       log4j
+Requires:       args4j
+Requires:       openprops
+Requires:       apache-commons-collections
+Requires:       guava
 BuildRequires:  hamcrest12
-Requires:  apache-commons-lang
-Requires:  apache-commons-codec
-Requires:  apache-commons-io
-Requires:  opencsv
-Requires:  ant
+Requires:       apache-commons-lang
+Requires:       apache-commons-codec
+Requires:       apache-commons-io
+Requires:       opencsv
+Requires:       ant
 
 # dependencies in zanata-cli
 BuildRequires:  %mvn_exec_plugin
 
 Requires:       jpackage-utils
 Requires:       java
+BuildRequires:	help2man
+
 
 %description
 Zanata common modules
@@ -105,8 +107,7 @@ This includes submodules:
 %build
 
 # -Dmaven.local.debug=true
-# TODO remove skip test
-mvn-rpmbuild package javadoc:aggregate -Dskiptests
+mvn-rpmbuild package javadoc:aggregate
 
 # local offline maven can not resolve each module, 
 # we have to disable our own module and generate classpath one by one
@@ -200,10 +201,12 @@ ZANATA_CLI
 chmod 755 $RPM_BUILD_ROOT%{_bindir}/zanata-cli
 #################################################################
 
-$RPM_BUILD_ROOT%{_bindir}/zanata-cli > README.txt
+# man page
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
+help2man $RPM_BUILD_ROOT%{_bindir}/zanata-cli > %{buildroot}%{_mandir}/man1/zanata-cli.1
 
-#%check
-#mvn-rpmbuild verify
+%check
+mvn-rpmbuild verify
 
 %files
 %{_mavenpomdir}/JPP-%{name}.pom
@@ -215,7 +218,7 @@ $RPM_BUILD_ROOT%{_bindir}/zanata-cli > README.txt
 %{_javadir}/%{submodule_commands}.jar
 %{_javadir}/%{submodule_cli}.jar
 %attr(0755,root,root) %{_bindir}/zanata-cli
-%doc README.txt
+%attr(0644,root,root) %doc %_mandir/man1/zanata-cli.1.gz
 
 %files javadoc
 %{_javadocdir}/%{submodule_rest}
