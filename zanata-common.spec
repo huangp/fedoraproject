@@ -1,16 +1,10 @@
-%if 0%{?fedora} > 18
-    %define mvnbuildRequires maven-local
-%else
-    %define mvnbuildRequires maven
-%endif
+%global shortname common
 
-%define shortname common
-
-%define submodule_util zanata-%{shortname}-util
-%define submodule_po zanata-adapter-po
-%define submodule_properties zanata-adapter-properties
-%define submodule_xliff zanata-adapter-xliff
-%define submodule_glossary zanata-adapter-glossary
+%global submodule_util zanata-%{shortname}-util
+%global submodule_po zanata-adapter-po
+%global submodule_properties zanata-adapter-properties
+%global submodule_xliff zanata-adapter-xliff
+%global submodule_glossary zanata-adapter-glossary
 
 Name:           zanata-%{shortname}
 Version:        2.1.1
@@ -109,7 +103,7 @@ mvn-rpmbuild package javadoc:aggregate
 
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 
-%define ver SNAPSHOT
+%global ver SNAPSHOT
 # TODO change *-SNAPSHOT to %{version}
 cp -p %{submodule_util}/target/%{submodule_util}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_util}.jar
 cp -p %{submodule_po}/target/%{submodule_po}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_po}.jar

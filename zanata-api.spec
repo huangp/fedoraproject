@@ -1,11 +1,5 @@
-%if 0%{?fedora} > 18
-    %define mvnbuildRequires maven-local
-%else
-    %define mvnbuildRequires maven
-%endif
-
-%define shortname api
-%define submodule zanata-common-%{shortname}
+%global shortname api
+%global submodule zanata-common-%{shortname}
 
 Name:           zanata-%{shortname}
 Version:        2.1.0
@@ -23,7 +17,7 @@ BuildRequires:  jpackage-utils
 
 BuildRequires:  java-devel
 
-BuildRequires:  %mvnbuildRequires
+BuildRequires:  maven-local
 
 BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-install-plugin

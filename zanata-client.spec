@@ -1,16 +1,14 @@
 %if 0%{?fedora} > 18
-    %define mvnbuildRequires maven-local
-    %define mvn_exec_plugin exec-maven-plugin
+    %global mvn_exec_plugin exec-maven-plugin
 %else
-    %define mvnbuildRequires maven
-    %define mvn_exec_plugin maven-plugin-exec
+    %global mvn_exec_plugin maven-plugin-exec
 %endif
 
-%define shortname client
+%global shortname client
 
-%define submodule_rest zanata-rest-%{shortname}
-%define submodule_commands zanata-%{shortname}-commands
-%define submodule_cli zanata-cli
+%global submodule_rest zanata-rest-%{shortname}
+%global submodule_commands zanata-%{shortname}-commands
+%global submodule_cli zanata-cli
 
 Name:           zanata-%{shortname}
 Version:        2.0.1
@@ -28,7 +26,7 @@ BuildRequires:  jpackage-utils
 
 BuildRequires:  java-devel
 
-BuildRequires:  %mvnbuildRequires
+BuildRequires:  maven-local
 
 BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-install-plugin
@@ -129,7 +127,7 @@ mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile
 
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 
-%define ver SNAPSHOT
+%global ver SNAPSHOT
 # TODO change *-SNAPSHOT to %{version}
 cp -p %{submodule_rest}/target/%{submodule_rest}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_rest}.jar
 cp -p %{submodule_commands}/target/%{submodule_commands}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_commands}.jar
@@ -156,7 +154,7 @@ rest_cp=$(cat %{submodule_rest}/target/%{submodule_rest}-classpath.txt)
 commands_cp=$(cat %{submodule_commands}/target/%{submodule_commands}-classpath.txt)
 cli_cp=$(cat %{submodule_cli}/target/%{submodule_cli}-classpath.txt)
 
-%define CLASSPATH $rest_cp:$commands_cp:$cli_cp
+%global CLASSPATH $rest_cp:$commands_cp:$cli_cp
 
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 
