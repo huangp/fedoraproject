@@ -1,12 +1,6 @@
-%if 0%{?fedora} > 18
-    %define mvnbuildRequires maven-local
-%else
-    %define mvnbuildRequires maven
-%endif
-
 Name:           jgettext
 Version:        0.12
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        An ANTLR-based parser and generator for GNU Gettext PO/POT 
 
 Group:          Development/Libraries
@@ -20,7 +14,7 @@ BuildRequires:  jpackage-utils
 
 BuildRequires:  java-devel
 
-BuildRequires:  %mvnbuildRequires
+BuildRequires:  maven-local
 
 BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-install-plugin
@@ -31,7 +25,7 @@ BuildRequires:  maven-resources-plugin
 BuildRequires:  maven-enforcer-plugin
 BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-junit4
-BuildRequires:  antlr
+Requires:       antlr
 BuildRequires:  antlr-maven-plugin
 BuildRequires:  junit
 BuildRequires:  gettext
@@ -75,16 +69,16 @@ install -pm 644 pom.xml  \
 %check
 mvn-rpmbuild verify
 
-%files
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavendepmapfragdir}/%{name}
-%{_javadir}/%{name}.jar
+%files -f .mfiles
 %doc README.txt
 
 %files javadoc
 %{_javadocdir}/%{name}
 
 %changelog
+* Tue Feb 19 2013 Patrick Huang <pahuang@redhat.com> 0.12-2
+- Update maven-local and file section using new macro
+
 * Thu Feb 7 2013 Patrick Huang <pahuang@redhat.com> 0.12-1
 - Version 0.12
 
