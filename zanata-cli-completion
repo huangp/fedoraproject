@@ -1,0 +1,43 @@
+#
+# Completion for zanata-cli:
+# TODO should auto generate most of the script
+#
+_zanata()
+{
+    local cur prev opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    
+    # basic actions we will complete
+    opts="push pull stats list-remote put-project put-user put-version"
+    
+    # complete the arguments for push and pull    
+    case "${prev}" in
+        push)
+            local push_opts="--project --project-version --project-type --push-type --src-dir --trans-dir --copy-trans --locales"
+            COMPREPLY=( $(compgen -W "${push_opts}" -- ${cur}) )
+            return 0
+            ;;
+        pull)
+            local pull_opts="--project --project-version --pull-type --src-dir --trans-dir --locales"
+            COMPREPLY=( $(compgen -W "${pull_opts}" -- ${cur}) )
+            return 0
+            ;;
+        --src-dir)
+            COMPREPLY=( $(compgen -d ${cur}) )
+            return 0
+            ;;
+        --trans-dir)
+            COMPREPLY=( $(compgen -d ${cur}) )
+            return 0
+            ;;
+    esac
+    
+    # only output actions when there is lest than 3 words in command line
+    if [[ ${#COMP_WORDS[@]} -lt 3 ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _zanata zanata-cli
