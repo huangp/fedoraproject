@@ -95,12 +95,8 @@ install -pm 644 %{submodule}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodul
 %check
 mvn-rpmbuild verify
 
-%files
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavenpomdir}/JPP-%{submodule}.pom
-%{_mavendepmapfragdir}/%{name}
-%{_javadir}/%{submodule}.jar
-%doc
+%files -f .mfiles
+%doc README.txt
 
 %files javadoc
 %{_javadocdir}/%{submodule}

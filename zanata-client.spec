@@ -206,17 +206,10 @@ help2man $RPM_BUILD_ROOT%{_bindir}/zanata-cli > %{buildroot}%{_mandir}/man1/zana
 %check
 mvn-rpmbuild verify
 
-%files
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavenpomdir}/JPP-%{submodule_rest}.pom
-%{_mavenpomdir}/JPP-%{submodule_commands}.pom
-%{_mavenpomdir}/JPP-%{submodule_cli}.pom
-%{_mavendepmapfragdir}/%{name}
-%{_javadir}/%{submodule_rest}.jar
-%{_javadir}/%{submodule_commands}.jar
-%{_javadir}/%{submodule_cli}.jar
+%files -f .mfiles
 %attr(0755,root,root) %{_bindir}/zanata-cli
 %attr(0644,root,root) %doc %_mandir/man1/zanata-cli.1.gz
+%doc README.txt
 
 %files javadoc
 %{_javadocdir}/%{submodule_rest}

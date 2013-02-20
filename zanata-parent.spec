@@ -1,10 +1,4 @@
-%if 0%{?fedora} > 18
-    %define mvnbuildRequires maven-local
-%else
-    %define mvnbuildRequires maven
-%endif
-
-%define shortname parent
+%global shortname parent
 
 Name:           zanata-%{shortname}
 Version:        9
@@ -22,7 +16,7 @@ BuildRequires:  jpackage-utils
 
 BuildRequires:  java-devel
 
-BuildRequires:  %mvnbuildRequires
+BuildRequires:  maven-local
 
 BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-install-plugin
@@ -54,10 +48,8 @@ install -pm 644 pom.xml  \
 
 %add_maven_depmap JPP-%{name}.pom %{name}.jar
 
-%files
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavendepmapfragdir}/%{name}
-%doc
+%files -f .mfiles
+%doc README.txt
 
 %changelog
 * Thu Feb 8 2013 Patrick Huang <pahuang@redhat.com> 9-1

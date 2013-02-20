@@ -137,20 +137,8 @@ install -pm 644 %{submodule_glossary}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%
 %check
 mvn-rpmbuild verify
 
-%files
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavenpomdir}/JPP-%{submodule_util}.pom
-%{_mavenpomdir}/JPP-%{submodule_po}.pom
-%{_mavenpomdir}/JPP-%{submodule_properties}.pom
-%{_mavenpomdir}/JPP-%{submodule_xliff}.pom
-%{_mavenpomdir}/JPP-%{submodule_glossary}.pom
-%{_mavendepmapfragdir}/%{name}
-%{_javadir}/%{submodule_util}.jar
-%{_javadir}/%{submodule_po}.jar
-%{_javadir}/%{submodule_properties}.jar
-%{_javadir}/%{submodule_xliff}.jar
-%{_javadir}/%{submodule_glossary}.jar
-%doc
+%files -f .mfiles
+%doc README.txt
 
 %files javadoc
 %{_javadocdir}/%{submodule_util}
