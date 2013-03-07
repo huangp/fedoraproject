@@ -1,16 +1,14 @@
 %global shortname parent
 
 Name:           zanata-%{shortname}
-Version:        10
-Release:        2%{?dist}
+Version:        11
+Release:        1%{?dist}
 Summary:        The Project Object Model(pom) files for the Zanata packages
 
 Group:          Development/Libraries
 License:        LGPLv2
 URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{name}-%{version}.zip
-Source1:        http://www.gnu.org/licenses/gpl-2.0.txt
-Source2:        http://www.gnu.org/licenses/lgpl-2.1.txt
 
 BuildArch:      noarch
 
@@ -39,28 +37,38 @@ The Project Object Model(pom) files for the Zanata packages.
 
 %prep
 %setup -q -n %{name}-%{name}-%{version}
-# disable maven enforcer
+# disable maven enforcer and find bugs plugin
 %pom_remove_plugin :maven-enforcer-plugin
+%pom_remove_plugin :findbugs-maven-plugin
 # we have to remove wagon-webdav-jackrabbit until jackrabbit is available
-
-cp -p %{SOURCE1} ./COPYING.LESSER
-cp -p %{SOURCE2} ./COPYING.GPL
+%pom_xpath_remove "pom:build/pom:extensions"
 
 %build
-
+%if 0%{?fedora} >= 19
+%mvn_build
+%else
 mvn-rpmbuild install
+%endif
 
 %install
+
+%if 0%{?fedora} >= 19
+%mvn_install
+%else
 install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -pm 644 pom.xml  \
         $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 
 %add_maven_depmap JPP-%{name}.pom
+%endif
 
 %files -f .mfiles
 %doc README.txt COPYING.LESSER COPYING.GPL
 
 %changelog
+* Wed Mar 6 2013 Patrick Huang <pahuang@redhat.com> 11-1
+- upstream version upgrade
+
 * Wed Mar 6 2013 Patrick Huang <pahuang@redhat.com> 10-2
 - add licenses
 
