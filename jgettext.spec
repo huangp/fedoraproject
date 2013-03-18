@@ -1,6 +1,6 @@
 Name:           jgettext
-Version:        0.12
-Release:        2%{?dist}
+Version:        0.13
+Release:        1%{?dist}
 Summary:        An ANTLR-based parser and generator for GNU Gettext PO/POT 
 
 Group:          Development/Libraries
@@ -16,14 +16,10 @@ BuildRequires:  java-devel
 
 BuildRequires:  maven-local
 
-BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-install-plugin
-BuildRequires:  maven-jar-plugin
-BuildRequires:  maven-javadoc-plugin
 BuildRequires:  maven-release-plugin
 BuildRequires:  maven-resources-plugin
 BuildRequires:  maven-enforcer-plugin
-BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-junit4
 Requires:       antlr
 BuildRequires:  antlr-maven-plugin
@@ -49,11 +45,17 @@ This package contains the API documentation for %{name}.
 %setup -q -n %{name}-%{name}-%{version}
 
 %build
-
+%if 0%{?fedora} >= 19
+%mvn_build
+%else
 mvn-rpmbuild package javadoc:aggregate
+%endif
+
 
 %install
-
+%if 0%{?fedora} >= 19
+%mvn_install
+%else
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 cp -p target/jgettext*.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 
@@ -64,10 +66,8 @@ install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -pm 644 pom.xml  \
         $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
-
-%check
-mvn-rpmbuild verify
+%add_maven_depmap
+%endif
 
 %files -f .mfiles
 %doc README.txt
@@ -76,6 +76,9 @@ mvn-rpmbuild verify
 %{_javadocdir}/%{name}
 
 %changelog
+* Tue Mar 19 2013 Patrick Huang <pahuang@redhat.com> 0.13-1
+- Upstream version upgrade and fix issue in review process
+
 * Tue Feb 19 2013 Patrick Huang <pahuang@redhat.com> 0.12-2
 - Update maven-local and file section using new macro
 
