@@ -10,28 +10,15 @@ Group:          Development/Libraries
 License:        LGPLv2
 URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version}.zip
-Source1:        http://www.gnu.org/licenses/gpl-2.0.txt
-Source2:        http://www.gnu.org/licenses/lgpl-2.1.txt
 #Source3:        hamcrest-depmap.xml
-Patch0:         0001-fix-static-import-for-openJDK-7.patch
+#Patch0:         0001-fix-static-import-for-openJDK-7.patch
 
 BuildArch:      noarch
 
 BuildRequires:  jpackage-utils
 
-BuildRequires:  java-devel
-
 BuildRequires:  maven-local
-
-BuildRequires:  maven-compiler-plugin
-BuildRequires:  maven-install-plugin
-BuildRequires:  maven-jar-plugin
-BuildRequires:  maven-javadoc-plugin
-BuildRequires:  maven-release-plugin
-BuildRequires:  maven-resources-plugin
-BuildRequires:  maven-dependency-plugin
 BuildRequires:  maven-enforcer-plugin
-BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
@@ -73,7 +60,7 @@ This package contains the API documentation for %{submodule}.
 %prep
 %setup -q -n %{name}-%{shortname}-%{version}
 %pom_remove_plugin :maven-dependency-plugin %{submodule}
-%patch0
+#%patch0
 
 # see below todo tag
 #%pom_remove_dep org.hamcrest:hamcrest-core %{submodule}
@@ -81,17 +68,20 @@ This package contains the API documentation for %{submodule}.
 #%pom_xpath_inject "pom:dependencies" "<dependency><groupId>org.hamcrest</groupId><artifactId>hamcrest-core</artifactId><version>1.2</version><scope>test</scope></dependency>" %{submodule}
 #%pom_xpath_inject "pom:dependencies" "<dependency><groupId>org.hamcrest</groupId><artifactId>hamcrest-library</artifactId><version>1.2</version><scope>test</scope></dependency>" %{submodule}
 
-cp -p %{SOURCE1} ./COPYING.LESSER
-cp -p %{SOURCE2} ./COPYING.GPL
-
 %build
 
 # -Dmaven.local.debug=true
 # TODO we want to use hamcrest12 but it has a bug rhbz#917857 in fedora we can not compile test classes in rawhide
+%if 0%{?fedora} > 18
+%mvn_build --skip-tests
+%else
 mvn-rpmbuild package javadoc:aggregate -Dmaven.test.skip=true
+%endif
 
 %install
-
+%if 0%{?fedora} > 18
+%mvn_install
+%else
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 cp -p %{submodule}/target/%{submodule}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule}.jar
 
@@ -105,15 +95,17 @@ install -pm 644 %{submodule}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodul
 
 %add_maven_depmap JPP-%{name}.pom
 %add_maven_depmap JPP-%{submodule}.pom %{submodule}.jar
-
-#%check
-#mvn-rpmbuild verify
+%endif
 
 %files -f .mfiles
-%doc README.txt COPYING.LESSER COPYING.GPL
+%doc README.txt 
 
+%if 0%{?fedora} > 18
+%files javadoc -f .mfiles-javadoc
+%else
 %files javadoc
 %{_javadocdir}/%{submodule}
+%endif
 
 %changelog
 * Wed Feb 27 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-1
