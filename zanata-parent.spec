@@ -2,7 +2,7 @@
 
 Name:           zanata-%{shortname}
 Version:        11
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Project Object Model(pom) files for the Zanata packages
 
 Group:          Development/Libraries
@@ -14,18 +14,8 @@ BuildArch:      noarch
 
 BuildRequires:  jpackage-utils
 
-BuildRequires:  java-devel
-
 BuildRequires:  maven-local
 
-BuildRequires:  maven-compiler-plugin
-BuildRequires:  maven-install-plugin
-BuildRequires:  maven-jar-plugin
-BuildRequires:  maven-javadoc-plugin
-BuildRequires:  maven-release-plugin
-BuildRequires:  maven-resources-plugin
-BuildRequires:  maven-enforcer-plugin
-BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-junit4
 BuildRequires:  resteasy
 
@@ -41,6 +31,7 @@ The Project Object Model(pom) files for the Zanata packages.
 %pom_remove_plugin :maven-enforcer-plugin
 %pom_remove_plugin :findbugs-maven-plugin
 %pom_remove_plugin :versions-maven-plugin
+%pom_remove_plugin :maven-eclipse-plugin
 
 # we have to remove wagon-webdav-jackrabbit until jackrabbit is available
 %pom_xpath_remove "pom:build/pom:extensions"
@@ -68,6 +59,9 @@ install -pm 644 pom.xml  \
 %doc README.txt COPYING.LESSER COPYING.GPL
 
 %changelog
+* Tue Mar 19 2013 Patrick Huang <pahuang@redhat.com> 11-3
+- change according to new java packaging guideline
+
 * Tue Mar 12 2013 Patrick Huang <pahuang@redhat.com> 11-2
 - disable a few plugins that are not relevant in fedora packaging
 
