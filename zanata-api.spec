@@ -3,7 +3,7 @@
 
 Name:           zanata-%{shortname}
 Version:        2.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Zanata API modules
 
 Group:          Development/Libraries
@@ -15,30 +15,31 @@ Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version
 
 BuildArch:      noarch
 
-BuildRequires:  jpackage-utils
-
 BuildRequires:  maven-local
 BuildRequires:  maven-enforcer-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
-BuildRequires:  hamcrest12
+BuildRequires:  zanata-parent
+BuildRequires:  hamcrest
 BuildRequires:  testng
 
 # dependencies in zanata-common-api
 BuildRequires:  hibernate-validator
-Requires:       hibernate-validator
 BuildRequires:  jackson
-Requires:       jackson
 BuildRequires:  apache-commons-lang
-Requires:       apache-commons-lang
 BuildRequires:  apache-commons-codec
-Requires:       apache-commons-codec
 BuildRequires:  resteasy
-Requires:       resteasy
 BuildRequires:  slf4j
-Requires:       slf4j
 BuildRequires:  jboss-annotations-1.1-api
+
+
+Requires:       hibernate-validator
+Requires:       jackson
+Requires:       apache-commons-lang
+Requires:       apache-commons-codec
+Requires:       resteasy
+Requires:       slf4j
 Requires:       jboss-annotations-1.1-api
 
 Requires:       jpackage-utils
@@ -72,42 +73,21 @@ This package contains the API documentation for %{submodule}.
 
 # -Dmaven.local.debug=true
 # TODO we want to use hamcrest12 but it has a bug rhbz#917857 in fedora we can not compile test classes in rawhide
-%if 0%{?fedora} > 18
-%mvn_build --skip-tests
-%else
-mvn-rpmbuild package javadoc:aggregate -Dmaven.test.skip=true
-%endif
+#%mvn_build --skip-tests
+%mvn_build
 
 %install
-%if 0%{?fedora} > 18
 %mvn_install
-%else
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p %{submodule}/target/%{submodule}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule}.jar
-
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule}
-
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml  \
-        $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-install -pm 644 %{submodule}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule}.pom
-
-%add_maven_depmap JPP-%{name}.pom
-%add_maven_depmap JPP-%{submodule}.pom %{submodule}.jar
-%endif
 
 %files -f .mfiles
 %doc README.txt 
 
-%if 0%{?fedora} > 18
 %files javadoc -f .mfiles-javadoc
-%else
-%files javadoc
-%{_javadocdir}/%{submodule}
-%endif
 
 %changelog
+* Wed Apr 17 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-2
+- Remove conditional build and only target f19
+
 * Wed Feb 27 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-1
 - Upstream update to version 2.2.0
 
