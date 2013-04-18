@@ -9,7 +9,7 @@
 Name:           zanata-%{shortname}
 Version:        2.2.1
 Release:        1%{?dist}
-Summary:        Zanata API modules
+Summary:        Zanata common modules
 
 Group:          Development/Libraries
 License:        LGPLv2
@@ -24,10 +24,11 @@ BuildRequires:  maven-enforcer-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
+BuildRequires:  zanata-parent
 BuildRequires:	zanata-api
 BuildRequires:	slf4j
 BuildRequires:  testng
-BuildRequires:  hamcrest12
+BuildRequires:  hamcrest
 
 # dependencies in zanata-common-util
 BuildRequires:	jackson
@@ -36,7 +37,7 @@ BuildRequires:	apache-commons-io
 BuildRequires:	apache-commons-codec
 BuildRequires:  junit
 
-# dependencies in zanata-adapter-pvo
+# dependencies in zanata-adapter-po
 BuildRequires:	jgettext
 BuildRequires:	apache-commons-lang
 
@@ -50,20 +51,49 @@ BuildRequires:	opencsv
 
 Requires:       jpackage-utils
 Requires:       java
-
 Requires:       zanata-api
 Requires:       slf4j
+
+%description
+Zanata common modules
+
+%package -n %{submodule_util}
+Summary:        Zanata common utility module
 Requires:       jackson
 Requires:       guava
 Requires:       apache-commons-io
 Requires:       apache-commons-codec
+
+%description -n %{submodule_util}
+%{Summary}
+
+%package -n %{submodule_po}
+Summary:        PO reader and writer
 Requires:       jgettext
 Requires:       apache-commons-lang
+
+%description -n %{submodule_po}
+%{summary}
+
+%package -n %{submodule_properties}
+Summary:        Properties reader and writer
 Requires:       openprops
+
+%description -n %{submodule_properties}
+%{summary}
+
+%package -n %{submodule_xliff}
+Summary:        xliff reader and writer
+
+%description -n %{submodule_xliff}
+%{summary}
+
+%package -n %{submodule_glossary}
+Summary:        glossary reader and writer
 Requires:       opencsv
 
-%description
-Zanata common modules
+%description -n %{submodule_glossary}
+%{summary}
 
 %package javadoc
 Summary:        Javadocs for %{name}
@@ -82,64 +112,22 @@ and %{submodule_glossary}
 %pom_remove_plugin :maven-dependency-plugin
 
 %build
-
-# -Dmaven.local.debug=true
-%if 0%{?fedora} > 18
-%mvn_build --skip-tests
-%else
-mvn-rpmbuild package javadoc:aggregate -Dmaven.test.skip=true
-%endif
+%mvn_build -s
 
 %install
-
-%if 0%{?fedora} > 18
 %mvn_install
-%else
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-
-cp -p %{submodule_util}/target/%{submodule_util}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_util}.jar
-cp -p %{submodule_po}/target/%{submodule_po}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_po}.jar
-cp -p %{submodule_properties}/target/%{submodule_properties}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_properties}.jar
-cp -p %{submodule_xliff}/target/%{submodule_xliff}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_xliff}.jar
-cp -p %{submodule_glossary}/target/%{submodule_glossary}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_glossary}.jar
-
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_util}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_po}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_properties}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_xliff}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_glossary}
-
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml  \
-        $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-install -pm 644 %{submodule_util}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_util}.pom
-install -pm 644 %{submodule_po}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_po}.pom
-install -pm 644 %{submodule_properties}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_properties}.pom
-install -pm 644 %{submodule_xliff}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_xliff}.pom
-install -pm 644 %{submodule_glossary}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_glossary}.pom
-
-%add_maven_depmap JPP-%{name}.pom
-%add_maven_depmap JPP-%{submodule_util}.pom %{submodule_util}.jar
-%add_maven_depmap JPP-%{submodule_po}.pom %{submodule_po}.jar
-%add_maven_depmap JPP-%{submodule_properties}.pom %{submodule_properties}.jar
-%add_maven_depmap JPP-%{submodule_xliff}.pom %{submodule_xliff}.jar
-%add_maven_depmap JPP-%{submodule_glossary}.pom %{submodule_glossary}.jar
-%endif
 
 %files -f .mfiles
 %doc README.txt COPYING.LESSER COPYING.GPL
 
-%if 0%{?fedora} > 18
+%files -f .mfiles-%{shortname}
+%files -n %{submodule_util} -f .mfiles-%{submodule_util}
+%files -n %{submodule_po} -f .mfiles-%{submodule_po}
+%files -n %{submodule_properties} -f .mfiles-%{submodule_properties}
+%files -n %{submodule_xliff} -f .mfiles-%{submodule_xliff}
+%files -n %{submodule_glossary} -f .mfiles-%{submodule_glossary}
+
 %files javadoc -f .mfiles-javadoc
-%else
-%files javadoc
-%{_javadocdir}/%{submodule_util}
-%{_javadocdir}/%{submodule_po}
-%{_javadocdir}/%{submodule_properties}
-%{_javadocdir}/%{submodule_xliff}
-%{_javadocdir}/%{submodule_glossary}
-%endif
 
 %changelog
 * Tue Mar 19 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-1
