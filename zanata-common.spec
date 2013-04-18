@@ -18,8 +18,6 @@ Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version
 
 BuildArch:      noarch
 
-BuildRequires:  jpackage-utils
-
 BuildRequires:	maven-local 
 
 BuildRequires:  maven-enforcer-plugin
@@ -27,41 +25,42 @@ BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
 BuildRequires:	zanata-api
-Requires:       zanata-api
 BuildRequires:	slf4j
-Requires:       slf4j 
-BuildRequires:  testng 
+BuildRequires:  testng
 BuildRequires:  hamcrest12
 
 # dependencies in zanata-common-util
 BuildRequires:	jackson
-Requires:       jackson
 BuildRequires:	guava
-Requires:       guava
 BuildRequires:	apache-commons-io
-Requires:       apache-commons-io
 BuildRequires:	apache-commons-codec
-Requires:       apache-commons-codec
-BuildRequires:  junit     
+BuildRequires:  junit
 
 # dependencies in zanata-adapter-pvo
 BuildRequires:	jgettext
-Requires:       jgettext
 BuildRequires:	apache-commons-lang
-Requires:       apache-commons-lang
 
 # dependencies in zanata-adapter-properties
 BuildRequires:	openprops
-Requires:       openprops
 
 # dependencies in zanata-adapter-xliff (no extra)
 
 # dependencies in zanata-adapter-glossary
-BuildRequires:	opencsv	
-Requires:       opencsv
+BuildRequires:	opencsv
 
 Requires:       jpackage-utils
 Requires:       java
+
+Requires:       zanata-api
+Requires:       slf4j
+Requires:       jackson
+Requires:       guava
+Requires:       apache-commons-io
+Requires:       apache-commons-codec
+Requires:       jgettext
+Requires:       apache-commons-lang
+Requires:       openprops
+Requires:       opencsv
 
 %description
 Zanata common modules
