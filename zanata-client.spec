@@ -50,7 +50,7 @@ BuildRequires:  args4j
 BuildRequires:  openprops
 BuildRequires:  apache-commons-collections
 BuildRequires:  guava
-BuildRequires:  hamcrest12
+BuildRequires:  hamcrest
 BuildRequires:  apache-commons-lang
 BuildRequires:  apache-commons-codec
 BuildRequires:  apache-commons-io
@@ -98,46 +98,14 @@ This includes submodules:
 # TODO change back to version
 %setup -q -n %{name}-%{shortname}-%{version}
 #%setup -q -n %{name}-master
-# Disables child-module-1, a submodule of the main pom.xml file
-# Removes dependency
-%pom_disable_module zanata-maven-plugin
-
-cat > localdepmap.xml << EOF
-<dependency>
-    <maven>
-        <groupId>net.sf.opencsv</groupId>
-        <artifactId>opencsv</artifactId>
-        <version>2.1</version>
-    </maven>
-    <jpp>
-        <groupId>JPP</groupId>
-        <artifactId>opencsv</artifactId>
-        <version>2.3</version>
-    </jpp>
-</dependency>
-EOF
-
-### TODO this is a quick fix for f17 depend on older version of slf4j
-findString='log.info("pushing target doc [name={} size={} client-locale={}] to server [locale={}] (skipped due to dry run)", srcDoc.getName(), targetDoc.getTextFlowTargets().size(), locale.getLocalLocale(), locale.getLocale());'
-
-replaceString='log.info("pushing target doc [name={} size={} client-locale={}] to server [locale={}] (skipped due to dry run)", new Object[] {srcDoc.getName(), targetDoc.getTextFlowTargets().size(), locale.getLocalLocale(), locale.getLocale()});'
-
-findString=$(echo $findString | sed -e 's/\([[\/.*]\|\]\)/\\&/g' )
-replaceString=$(echo $replaceString | sed -e 's/[\/&]/\\&/g' )
-
-sed -i "s/$findString/$replaceString/g" zanata-client-commands/src/main/java/org/zanata/client/commands/push/PushCommand.java
-### end of quick fix 
-
+%pom_disable_module zanata-maven-plugin 
 %pom_remove_plugin :appassembler-maven-plugin %{submodule_cli}
 %pom_remove_plugin :maven-assembly-plugin %{submodule_cli}
-
-# due to a bug in openJDK we can not use static import for members
-find . -type f -name "*Test.java" | xargs rm
 
 %build
 
 # -Dmaven.local.debug=true
-mvn-rpmbuild package javadoc:aggregate -Dmaven.local.depmap.file=localdepmap.xml -DskipTests=true
+%mvn_build -- -Dmdep.analyze.skip=true
 
 # local offline maven can not resolve each module, 
 # we have to disable our own module and generate classpath one by one
@@ -146,45 +114,18 @@ mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile
 
 cd ..
 %pom_remove_dep org.zanata:%{submodule_rest} %{submodule_commands}
-# opencsv is not built by maven and does not come with pom and depmap
-#%pom_remove_dep net.sf.opencsv:opencsv %{submodule_commands}
 cd %{submodule_commands}
-mvn-rpmbuild dependency:build-classpath -DincludeScope=compile \
-    -Dmdep.outputFile=target/%{submodule_commands}-classpath.txt -Dmaven.local.depmap.file=../localdepmap.xml
+mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/%{submodule_commands}-classpath.txt
 
 cd ..
 %pom_remove_dep org.zanata:%{submodule_commands} %{submodule_cli}
 cd %{submodule_cli}
-mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/%{submodule_cli}-classpath.txt -Dmaven.local.depmap.file=../localdepmap.xml
+mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile=target/%{submodule_cli}-classpath.txt
 
 
 %install
 
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-
-#%global ver SNAPSHOT
-%global ver %{version}
-# TODO change *-SNAPSHOT to %{version}
-cp -p %{submodule_rest}/target/%{submodule_rest}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_rest}.jar
-cp -p %{submodule_commands}/target/%{submodule_commands}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_commands}.jar
-cp -p %{submodule_cli}/target/%{submodule_cli}*-%{ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_cli}.jar
-
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_rest}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_commands}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_cli}
-
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml  \
-        $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-install -pm 644 %{submodule_rest}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_rest}.pom
-install -pm 644 %{submodule_commands}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_commands}.pom
-install -pm 644 %{submodule_cli}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_cli}.pom
-
-%add_maven_depmap JPP-%{name}.pom
-%add_maven_depmap JPP-%{submodule_rest}.pom %{submodule_rest}.jar
-%add_maven_depmap JPP-%{submodule_commands}.pom %{submodule_commands}.jar
-%add_maven_depmap JPP-%{submodule_cli}.pom %{submodule_cli}.jar
+%mvn_install
 
 rest_cp=$(cat %{submodule_rest}/target/%{submodule_rest}-classpath.txt)
 commands_cp=$(cat %{submodule_commands}/target/%{submodule_commands}-classpath.txt)
@@ -236,7 +177,7 @@ chmod 755 $RPM_BUILD_ROOT%{_bindir}/zanata-cli
 #################################################################
 
 # man page
-mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
+#mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 #help2man $RPM_BUILD_ROOT%{_bindir}/zanata-cli > %{buildroot}%{_mandir}/man1/zanata-cli.1
 
 #%check
@@ -247,10 +188,7 @@ mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 #%attr(0644,root,root) %doc %_mandir/man1/zanata-cli.1.gz
 %doc README.txt
 
-%files javadoc
-%{_javadocdir}/%{submodule_rest}
-%{_javadocdir}/%{submodule_commands}
-%{_javadocdir}/%{submodule_cli}
+%files javadoc -f .mfiles-javadoc
 
 %changelog
 * Fri Mar 1 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-1
