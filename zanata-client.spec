@@ -22,10 +22,6 @@ Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version
 
 BuildArch:      noarch
 
-BuildRequires:  jpackage-utils
-
-BuildRequires:  java-devel
-
 BuildRequires:  maven-local
 
 BuildRequires:  maven-compiler-plugin
@@ -39,42 +35,26 @@ BuildRequires:  maven-enforcer-plugin
 BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
 
-# dependencies in pom
-Requires:       slf4j 
-
 # dependencies in zanata-rest-client
-Requires:       zanata-api
+
 BuildRequires:  zanata-api
 BuildRequires:  junit
-Requires:       resteasy
 BuildRequires:  resteasy
 
 # dependencies in zanata-common-commands
-Requires:       zanata-common
 BuildRequires:  zanata-common
 BuildRequires:  mockito
-Requires:       apache-commons-configuration
 BuildRequires:  apache-commons-configuration
-Requires:       log4j
 BuildRequires:  log4j
-Requires:       args4j
 BuildRequires:  args4j
-Requires:       openprops
 BuildRequires:  openprops
-Requires:       apache-commons-collections
 BuildRequires:  apache-commons-collections
-Requires:       guava
 BuildRequires:  guava
 BuildRequires:  hamcrest12
-Requires:       apache-commons-lang
 BuildRequires:  apache-commons-lang
-Requires:       apache-commons-codec
 BuildRequires:  apache-commons-codec
-Requires:       apache-commons-io
 BuildRequires:  apache-commons-io
-Requires:       opencsv
 BuildRequires:  opencsv
-Requires:       ant
 BuildRequires:  ant
 
 # dependencies in zanata-cli
@@ -83,6 +63,22 @@ BuildRequires:  %mvn_exec_plugin
 Requires:       jpackage-utils
 Requires:       java
 #BuildRequires:	help2man
+
+Requires:       slf4j
+Requires:       zanata-api
+Requires:       resteasy
+Requires:       zanata-common
+Requires:       apache-commons-configuration
+Requires:       log4j
+Requires:       args4j
+Requires:       openprops
+Requires:       apache-commons-collections
+Requires:       guava
+Requires:       apache-commons-lang
+Requires:       apache-commons-codec
+Requires:       apache-commons-io
+Requires:       opencsv
+Requires:       ant
 
 
 %description
@@ -132,11 +128,6 @@ replaceString=$(echo $replaceString | sed -e 's/[\/&]/\\&/g' )
 sed -i "s/$findString/$replaceString/g" zanata-client-commands/src/main/java/org/zanata/client/commands/push/PushCommand.java
 ### end of quick fix 
 
-# we need to tweek some dependencies for it to build in fedora
-# Removes dependency
-#%pom_remove_dep groupId:artifactId
-# Adds new dependency
-#%pom_xpath_inject "pom:dependencies" "<dependency><groupId>blah</groupId><artifactId>blah</artifactId><version>1</version></dependency>"
 %pom_remove_plugin :appassembler-maven-plugin %{submodule_cli}
 %pom_remove_plugin :maven-assembly-plugin %{submodule_cli}
 
