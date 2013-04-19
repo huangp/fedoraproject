@@ -54,46 +54,21 @@ Requires:       java
 Requires:       zanata-api
 Requires:       slf4j
 
-%description
-Zanata common modules
-
-%package -n %{submodule_util}
-Summary:        Zanata common utility module
 Requires:       jackson
 Requires:       guava
 Requires:       apache-commons-io
 Requires:       apache-commons-codec
 
-%description -n %{submodule_util}
-%{Summary}
-
-%package -n %{submodule_po}
-Summary:        PO reader and writer
 Requires:       jgettext
 Requires:       apache-commons-lang
 
-%description -n %{submodule_po}
-%{summary}
-
-%package -n %{submodule_properties}
-Summary:        Properties reader and writer
 Requires:       openprops
 
-%description -n %{submodule_properties}
-%{summary}
-
-%package -n %{submodule_xliff}
-Summary:        xliff reader and writer
-
-%description -n %{submodule_xliff}
-%{summary}
-
-%package -n %{submodule_glossary}
-Summary:        glossary reader and writer
 Requires:       opencsv
 
-%description -n %{submodule_glossary}
-%{summary}
+%description
+Zanata common modules
+
 
 %package javadoc
 Summary:        Javadocs for %{name}
@@ -112,20 +87,13 @@ and %{submodule_glossary}
 %pom_remove_plugin :maven-dependency-plugin
 
 %build
-%mvn_build -s
+%mvn_build
 
 %install
 %mvn_install
 
 %files -f .mfiles
 %doc README.txt COPYING.LESSER COPYING.GPL
-
-%files -f .mfiles-%{shortname}
-%files -n %{submodule_util} -f .mfiles-%{submodule_util}
-%files -n %{submodule_po} -f .mfiles-%{submodule_po}
-%files -n %{submodule_properties} -f .mfiles-%{submodule_properties}
-%files -n %{submodule_xliff} -f .mfiles-%{submodule_xliff}
-%files -n %{submodule_glossary} -f .mfiles-%{submodule_glossary}
 
 %files javadoc -f .mfiles-javadoc
 
