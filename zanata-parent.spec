@@ -1,8 +1,8 @@
 %global shortname parent
 
 Name:           zanata-%{shortname}
-Version:        11
-Release:        3%{?dist}
+Version:        12
+Release:        1%{?dist}
 Summary:        The Project Object Model(pom) files for the Zanata packages
 
 Group:          Development/Libraries
@@ -11,8 +11,6 @@ URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{name}-%{version}.zip
 
 BuildArch:      noarch
-
-BuildRequires:  jpackage-utils
 
 BuildRequires:  maven-local
 
@@ -59,6 +57,9 @@ install -pm 644 pom.xml  \
 %doc README.txt COPYING.LESSER COPYING.GPL
 
 %changelog
+* Mon Apr 29 2013 Patrick Huang <pahuang@redhat.com> 12-1
+- latest upstream version
+
 * Tue Mar 19 2013 Patrick Huang <pahuang@redhat.com> 11-3
 - change according to new java packaging guideline
 
@@ -74,5 +75,5 @@ install -pm 644 pom.xml  \
 * Tue Feb 26 2013 Patrick Huang <pahuang@redhat.com> 10-1
 - upstream upgrade to version 10
 
-* Thu Feb 8 2013 Patrick Huang <pahuang@redhat.com> 9-1
+* Fri Feb 8 2013 Patrick Huang <pahuang@redhat.com> 9-1
 - Initial RPM package
