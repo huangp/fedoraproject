@@ -88,6 +88,7 @@ Zanata common modules
 Summary:        Javadocs for %{name}
 Group:          Documentation
 Requires:       jpackage-utils
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description javadoc
 This package contains the API documentation for %{shortname}.
@@ -184,6 +185,9 @@ chmod 755 $RPM_BUILD_ROOT%{_bindir}/zanata-cli
 #mvn-rpmbuild verify
 
 %files -f .mfiles
+%if 0%{?fedora} > 18
+%dir %{_javadir}/%{name}
+%endif
 %attr(0755,root,root) %{_bindir}/zanata-cli
 #%attr(0644,root,root) %doc %_mandir/man1/zanata-cli.1.gz
 %doc README.txt
