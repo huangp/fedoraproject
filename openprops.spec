@@ -1,6 +1,6 @@
 Name:           openprops
 Version:        0.6
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        An improved java.util.Properties from OpenJDK
 
 Group:          Development/Libraries
@@ -9,10 +9,6 @@ URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{name}-%{version}.zip
 
 BuildArch:      noarch
-
-BuildRequires:  jpackage-utils
-
-BuildRequires:  java-devel
 
 BuildRequires:  maven-local
 
@@ -66,34 +62,23 @@ This package contains the API documentation for %{name}.
 %setup -q -n %{name}-%{name}-%{version} 
  
 %build
-mvn-rpmbuild package javadoc:aggregate
+%mvn_build
 
 %install
-
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p target/%{name}*.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml  \
-        $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
-
-%check
-mvn-rpmbuild verify
+%mvn_install
 
 %files -f .mfiles
+%dir %{_javadir}/%{name}
 %doc README.txt COPYING.txt
 
-%files javadoc
-%{_javadocdir}/%{name}
+%files -f .mfiles-javadoc
 %doc COPYING.txt
 
 
 %changelog
+* Mon Apr 29 2013 Patrick Huang <pahuang@redhat.com> 0.6-5
+- Adapt latest java packacking guideline
+
 * Tue Feb 19 2013 Patrcik Huang <pahuang@redhat.com> 0.6-4
 - Add COPYING.txt into package and update summary and simplify file section
 
