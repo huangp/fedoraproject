@@ -3,7 +3,7 @@
 
 Name:           zanata-%{shortname}
 Version:        2.2.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Zanata API modules
 
 Group:          Development/Libraries
@@ -53,7 +53,7 @@ Zanata API modules
 Summary:        Javadocs for %{submodule}
 Group:          Documentation
 Requires:       jpackage-utils
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description javadoc
 This package contains the API documentation for %{submodule}.
@@ -110,6 +110,9 @@ install -pm 644 %{submodule}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodul
 %endif
 
 %changelog
+* Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-7
+- Remove javadoc subpackage require %{?_isa}
+
 * Tue Apr 23 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-6
 - Change license to LGPLv2+ and add subpackage requires according to review
 
