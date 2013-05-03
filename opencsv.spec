@@ -1,6 +1,6 @@
 Name:           opencsv
 Version:        2.3
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        A very simple csv (comma-separated values) parser library for Java
 Group:          Development/Libraries
 License:        ASL 2.0
@@ -8,10 +8,6 @@ URL:            http://opencsv.sourceforge.net/
 Source0:        http://sourceforge.net/projects/%{name}/files/%{name}/%{version}/%{name}-%{version}-src-with-libs.tar.gz
 BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
-BuildRequires:  jpackage-utils
-
-BuildRequires:  java-devel
 
 BuildRequires:  maven-local
 
@@ -55,34 +51,27 @@ rm -rf lib/* doc deploy
 
 %build
 # skip test because it is not jdk 1.6 compatible 
-%global mvn_opts -Dgpg.skip=true -Dproject.build.sourceEncoding=UTF-8 -Dmaven.test.skip=true
-mvn-rpmbuild package javadoc:aggregate %mvn_opts 
-
+#%global mvn_opts -Dgpg.skip=true -Dproject.build.sourceEncoding=UTF-8 -Dmaven.test.skip=true
+#mvn-rpmbuild package javadoc:aggregate %mvn_opts 
+%mvn_build --skip-tests
 
 %install
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p target/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml  \
-        $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
+%mvn_install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files -f .mfiles
+%dir %{_javadir}/%{name}
 %doc examples
 
-%files javadoc
-%{_javadocdir}/%{name}
+%files -f .mfiles-javadoc
 
 
 %changelog
+* Tue Apr 30 2013 Patrick Huang <pahuang@redhat.com> - 2.3-6
+- Adapte latest java packaging guideline
+
 * Fri Mar 1 2013 Patrick Huang <pahuang@redhat.com> - 2.3-5
 - Change to build by maven
 
