@@ -8,11 +8,11 @@
 
 Name:           zanata-%{shortname}
 Version:        2.2.1
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        Zanata common modules
 
 Group:          Development/Libraries
-License:        LGPLv2
+License:        LGPLv2+
 URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version}.zip
 
@@ -26,6 +26,9 @@ BuildRequires:  maven-surefire-provider-testng
 # dependencies in pom
 BuildRequires:  zanata-parent
 BuildRequires:	zanata-api
+%if 0%{?fedora} < 19
+BuildRequires:  apache-james-project
+%endif
 BuildRequires:	slf4j
 BuildRequires:  testng
 BuildRequires:  hamcrest
@@ -74,13 +77,15 @@ Zanata common modules
 Summary:        Javadocs for %{name}
 Group:          Documentation
 Requires:       jpackage-utils
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description javadoc
 This package contains the API documentation for %{shortname}.
 This includes submodules:
-%{submodule_util}, %{submodule_po}, %{submodule_properties}, %{submodule_xliff} 
-and %{submodule_glossary}
+%{submodule_util}, 
+%{submodule_po}, 
+%{submodule_properties}, 
+%{submodule_xliff} and %{submodule_glossary}
 
 %prep
 %setup -q -n %{name}-%{shortname}-%{version}
@@ -101,23 +106,23 @@ mvn-rpmbuild package javadoc:aggregate -Dmaven.test.skip=true
 %if 0%{?fedora} > 18
 %mvn_install
 %else
-mkdir -p $RPM_BUILD_ROOT%{_javadir}
+mkdir -p %{buildroot}%{_javadir}
 
-cp -p %{submodule_util}/target/%{submodule_util}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_util}.jar
-cp -p %{submodule_po}/target/%{submodule_po}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_po}.jar
-cp -p %{submodule_properties}/target/%{submodule_properties}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_properties}.jar
-cp -p %{submodule_xliff}/target/%{submodule_xliff}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_xliff}.jar
-cp -p %{submodule_glossary}/target/%{submodule_glossary}*-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{submodule_glossary}.jar
+cp -p %{submodule_util}/target/%{submodule_util}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_util}.jar
+cp -p %{submodule_po}/target/%{submodule_po}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_po}.jar
+cp -p %{submodule_properties}/target/%{submodule_properties}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_properties}.jar
+cp -p %{submodule_xliff}/target/%{submodule_xliff}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_xliff}.jar
+cp -p %{submodule_glossary}/target/%{submodule_glossary}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_glossary}.jar
 
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_util}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_po}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_properties}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_xliff}
-cp -rp target/site/apidocs $RPM_BUILD_ROOT%{_javadocdir}/%{submodule_glossary}
+mkdir -p %{buildroot}%{_javadocdir}/%{name}
+cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_util}
+cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_po}
+cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_properties}
+cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_xliff}
+cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_glossary}
 
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
+install -d -m 755 %{buildroot}%{_mavenpomdir}
+install -pm 644 pom.xml %{buildroot}%{_mavenpomdir}/JPP-%{name}.pom
 install -pm 644 %{submodule_util}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_util}.pom
 install -pm 644 %{submodule_po}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_po}.pom
 install -pm 644 %{submodule_properties}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_properties}.pom
@@ -144,15 +149,23 @@ install -pm 644 %{submodule_glossary}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%
 %files javadoc -f .mfiles-javadoc
 %else
 %files javadoc
-%{_javadocdir}/%{submodule_util}
-%{_javadocdir}/%{submodule_po}
-%{_javadocdir}/%{submodule_properties}
-%{_javadocdir}/%{submodule_xliff}
-%{_javadocdir}/%{submodule_glossary}
+%{_javadocdir}/%{name}/%{submodule_util}
+%{_javadocdir}/%{name}/%{submodule_po}
+%{_javadocdir}/%{name}/%{submodule_properties}
+%{_javadocdir}/%{name}/%{submodule_xliff}
+%{_javadocdir}/%{name}/%{submodule_glossary}
 %endif
 
 
 %changelog
+* Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-3
+- Remove javadoc subpackage require %{?_isa}
+- Change javadoc installation location
+- Change license to LGPLv2+
+
+* Wed May 1 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-2
+- Add missing pom for f19-
+
 * Tue Mar 19 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-1
 - Upstream version update
 
