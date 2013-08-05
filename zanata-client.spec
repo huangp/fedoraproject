@@ -12,34 +12,33 @@
 
 Name:           zanata-%{shortname}
 Version:        2.2.0
-Release:        1%{?dist}
-Summary:        Zanata API modules
+Release:        2%{?dist}
+Summary:        Zanata client module
 
 Group:          Development/Tools
-License:        LGPLv2
+License:        LGPLv2+
 URL:            https://github.com/zanata/%{name}
 Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version}.zip
+Patch0:         slf4j-backward-compatible-fix.patch
 
 BuildArch:      noarch
 
 BuildRequires:  maven-local
 
-BuildRequires:  maven-compiler-plugin
-BuildRequires:  maven-install-plugin
-BuildRequires:  maven-jar-plugin
-BuildRequires:  maven-javadoc-plugin
-BuildRequires:  maven-release-plugin
-BuildRequires:  maven-resources-plugin
 BuildRequires:  maven-dependency-plugin
 BuildRequires:  maven-enforcer-plugin
 BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-testng
+BuildRequires:  maven-surefire-provider-junit4
 
 # dependencies in zanata-rest-client
-
+BuildRequires:  zanata-parent
 BuildRequires:  zanata-api
 BuildRequires:  junit
 BuildRequires:  resteasy
+%if 0%{?fedora} < 19
+BuildRequires:  apache-james-project
+%endif
 
 # dependencies in zanata-common-commands
 BuildRequires:  zanata-common
@@ -62,7 +61,6 @@ BuildRequires:  %mvn_exec_plugin
 
 Requires:       jpackage-utils
 Requires:       java
-#BuildRequires:	help2man
 
 Requires:       slf4j
 Requires:       zanata-api
@@ -82,7 +80,9 @@ Requires:       ant
 
 
 %description
-Zanata common modules
+Zanata client modules. 
+Holds most of Zanata's client code, including Zanata CLI.
+It also contains REST stub for interacting with a Zanata server.
 
 %package javadoc
 Summary:        Javadocs for %{name}
@@ -96,22 +96,28 @@ This includes submodules:
 %{submodule_rest}, %{submodule_commands} and %{submodule_cli}.
 
 %prep
-# TODO change back to version
 %setup -q -n %{name}-%{shortname}-%{version}
-#%setup -q -n %{name}-master
 %pom_disable_module zanata-maven-plugin 
 %pom_remove_plugin :appassembler-maven-plugin %{submodule_cli}
 %pom_remove_plugin :maven-assembly-plugin %{submodule_cli}
 
+%if 0%{?fedora} < 18
+%patch0
+%endif
+
+
 %build
 # -Dmaven.local.debug=true
+# we delete all test class under f19 because of hamcrest compatibility issue
 %if 0%{?fedora} > 19
 %mvn_build -- -Dmdep.analyze.skip=true
 %endif
 %if 0%{?fedora} == 19
-%mvn_build --skip-tests -- -Dmdep.analyze.skip=true
+find . -type f -name "*Test.java" | xargs rm
+%mvn_build -- -Dmdep.analyze.skip=true -DskipTests
 %else
-mvn-rpmbuild package javadoc:aggregate -Dmaven.local.depmap.file=localdepmap.xml -DskipTests=true
+find . -type f -name "*Test.java" | xargs rm
+mvn-rpmbuild package javadoc:aggregate -DskipTests
 %endif
 
 # local offline maven can not resolve each module, 
@@ -136,12 +142,9 @@ mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile
 %else
 mkdir -p %{buildroot}%{_javadir}
 
-#%global ver SNAPSHOT
-%global ver %{version}
-# TODO change *-SNAPSHOT to %{version}
-cp -p %{submodule_rest}/target/%{submodule_rest}*-%{ver}.jar %{buildroot}%{_javadir}/%{submodule_rest}.jar
-cp -p %{submodule_commands}/target/%{submodule_commands}*-%{ver}.jar %{buildroot}%{_javadir}/%{submodule_commands}.jar
-cp -p %{submodule_cli}/target/%{submodule_cli}*-%{ver}.jar %{buildroot}%{_javadir}/%{submodule_cli}.jar
+cp -p %{submodule_rest}/target/%{submodule_rest}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_rest}.jar
+cp -p %{submodule_commands}/target/%{submodule_commands}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_commands}.jar
+cp -p %{submodule_cli}/target/%{submodule_cli}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_cli}.jar
 
 mkdir -p %{buildroot}%{_javadocdir}/%{name}
 cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_rest}
@@ -210,19 +213,12 @@ ZANATA_CLI
 chmod 755 %{buildroot}%{_bindir}/zanata-cli
 #################################################################
 
-# man page
-#mkdir -p %{buildroot}%{_mandir}/man1
-#help2man %{buildroot}%{_bindir}/zanata-cli > %{buildroot}%{_mandir}/man1/zanata-cli.1
-
-#%check
-#mvn-rpmbuild verify
 
 %files -f .mfiles
 %if 0%{?fedora} > 18
 %dir %{_javadir}/%{name}
 %endif
 %attr(0755,root,root) %{_bindir}/zanata-cli
-#%attr(0644,root,root) %doc %_mandir/man1/zanata-cli.1.gz
 %doc README.txt
 
 %if 0%{?fedora} > 18
@@ -235,6 +231,9 @@ chmod 755 %{buildroot}%{_bindir}/zanata-cli
 %endif
 
 %changelog
+* Thu May 16 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-2
+- Change license to LGPLv2+
+
 * Fri Mar 1 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-1
 - Upstream version update
 

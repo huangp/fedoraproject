@@ -8,7 +8,7 @@
 
 Name:           zanata-%{shortname}
 Version:        2.2.1
-Release:        3%{?dist}
+Release:        5%{?dist}
 Summary:        Zanata common modules
 
 Group:          Development/Libraries
@@ -18,39 +18,39 @@ Source0:        https://github.com/zanata/%{name}/archive/%{shortname}-%{version
 
 BuildArch:      noarch
 
-BuildRequires:	maven-local 
+BuildRequires:  maven-local 
 
 BuildRequires:  maven-enforcer-plugin
 BuildRequires:  maven-surefire-provider-testng
 
 # dependencies in pom
 BuildRequires:  zanata-parent
-BuildRequires:	zanata-api
+BuildRequires:  zanata-api
 %if 0%{?fedora} < 19
 BuildRequires:  apache-james-project
 %endif
-BuildRequires:	slf4j
+BuildRequires:  slf4j
 BuildRequires:  testng
 BuildRequires:  hamcrest
 
 # dependencies in zanata-common-util
-BuildRequires:	jackson
-BuildRequires:	guava
-BuildRequires:	apache-commons-io
-BuildRequires:	apache-commons-codec
+BuildRequires:  jackson
+BuildRequires:  guava
+BuildRequires:  apache-commons-io
+BuildRequires:  apache-commons-codec
 BuildRequires:  junit
 
 # dependencies in zanata-adapter-po
-BuildRequires:	jgettext
-BuildRequires:	apache-commons-lang
+BuildRequires:  jgettext
+BuildRequires:  apache-commons-lang
 
 # dependencies in zanata-adapter-properties
-BuildRequires:	openprops
+BuildRequires:  openprops
 
 # dependencies in zanata-adapter-xliff (no extra)
 
 # dependencies in zanata-adapter-glossary
-BuildRequires:	opencsv
+BuildRequires:  opencsv
 
 Requires:       jpackage-utils
 Requires:       java
@@ -89,7 +89,6 @@ This includes submodules:
 
 %prep
 %setup -q -n %{name}-%{shortname}-%{version}
-#%setup -q -n %{name}-master
 %pom_remove_plugin :maven-dependency-plugin
 
 %build
@@ -158,6 +157,12 @@ install -pm 644 %{submodule_glossary}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%
 
 
 %changelog
+* Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-5
+- Minor cosmetic change
+
+* Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-4
+- Minor cosmetic change
+
 * Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-3
 - Remove javadoc subpackage require %{?_isa}
 - Change javadoc installation location
