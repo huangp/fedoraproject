@@ -1,8 +1,8 @@
 %global shortname parent
 
 Name:           zanata-%{shortname}
-Version:        12
-Release:        1%{?dist}
+Version:        13
+Release:        2%{?dist}
 Summary:        The Project Object Model(pom) files for the Zanata packages
 
 Group:          Development/Libraries
@@ -57,6 +57,12 @@ install -pm 644 pom.xml  \
 %doc README.txt COPYING.LESSER COPYING.GPL
 
 %changelog
+* Thu Aug 22 2013 Patrick Huang <pahuang@redhat.com> 13-1
+- Latest upstream version
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 12-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Mon Apr 29 2013 Patrick Huang <pahuang@redhat.com> 12-1
 - latest upstream version
 

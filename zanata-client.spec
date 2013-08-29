@@ -1,9 +1,3 @@
-%if 0%{?fedora} > 18
-    %global mvn_exec_plugin exec-maven-plugin
-%else
-    %global mvn_exec_plugin maven-plugin-exec
-%endif
-
 %global shortname client
 
 %global submodule_rest zanata-rest-%{shortname}
@@ -11,8 +5,8 @@
 %global submodule_cli zanata-cli
 
 Name:           zanata-%{shortname}
-Version:        2.2.0
-Release:        2%{?dist}
+Version:        3.1.1
+Release:        1%{?dist}
 Summary:        Zanata client module
 
 Group:          Development/Tools
@@ -57,7 +51,10 @@ BuildRequires:  opencsv
 BuildRequires:  ant
 
 # dependencies in zanata-cli
-BuildRequires:  %mvn_exec_plugin
+BuildRequires:  exec-maven-plugin 
+BuildRequires:  powermock-junit4
+BuildRequires:  powermock-api-mockito
+BuildRequires:  powermock-core
 
 Requires:       jpackage-utils
 Requires:       java
@@ -101,24 +98,9 @@ This includes submodules:
 %pom_remove_plugin :appassembler-maven-plugin %{submodule_cli}
 %pom_remove_plugin :maven-assembly-plugin %{submodule_cli}
 
-%if 0%{?fedora} < 18
-%patch0
-%endif
-
-
 %build
 # -Dmaven.local.debug=true
-# we delete all test class under f19 because of hamcrest compatibility issue
-%if 0%{?fedora} > 19
-%mvn_build -- -Dmdep.analyze.skip=true
-%endif
-%if 0%{?fedora} == 19
-find . -type f -name "*Test.java" | xargs rm
-%mvn_build -- -Dmdep.analyze.skip=true -DskipTests
-%else
-find . -type f -name "*Test.java" | xargs rm
-mvn-rpmbuild package javadoc:aggregate -DskipTests
-%endif
+%mvn_build -- -Dmdep.analyze.skip=true -e
 
 # local offline maven can not resolve each module, 
 # we have to disable our own module and generate classpath one by one
@@ -137,32 +119,7 @@ mvn-rpmbuild dependency:build-classpath -DincludeScope=compile -Dmdep.outputFile
 
 
 %install
-%if 0%{?fedora} > 18
 %mvn_install
-%else
-mkdir -p %{buildroot}%{_javadir}
-
-cp -p %{submodule_rest}/target/%{submodule_rest}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_rest}.jar
-cp -p %{submodule_commands}/target/%{submodule_commands}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_commands}.jar
-cp -p %{submodule_cli}/target/%{submodule_cli}*-%{version}.jar %{buildroot}%{_javadir}/%{submodule_cli}.jar
-
-mkdir -p %{buildroot}%{_javadocdir}/%{name}
-cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_rest}
-cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_commands}
-cp -rp target/site/apidocs %{buildroot}%{_javadocdir}/%{name}/%{submodule_cli}
-
-install -d -m 755 %{buildroot}%{_mavenpomdir}
-install -pm 644 pom.xml %{buildroot}%{_mavenpomdir}/JPP-%{name}.pom
-install -pm 644 %{submodule_rest}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_rest}.pom
-install -pm 644 %{submodule_commands}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_commands}.pom
-install -pm 644 %{submodule_cli}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodule_cli}.pom
-
-%add_maven_depmap JPP-%{name}.pom
-%add_maven_depmap JPP-%{submodule_rest}.pom %{submodule_rest}.jar
-%add_maven_depmap JPP-%{submodule_commands}.pom %{submodule_commands}.jar
-%add_maven_depmap JPP-%{submodule_cli}.pom %{submodule_cli}.jar
-%endif
-
 
 rest_cp=$(cat %{submodule_rest}/target/%{submodule_rest}-classpath.txt)
 commands_cp=$(cat %{submodule_commands}/target/%{submodule_commands}-classpath.txt)
@@ -215,22 +172,22 @@ chmod 755 %{buildroot}%{_bindir}/zanata-cli
 
 
 %files -f .mfiles
-%if 0%{?fedora} > 18
 %dir %{_javadir}/%{name}
-%endif
 %attr(0755,root,root) %{_bindir}/zanata-cli
 %doc README.txt
 
-%if 0%{?fedora} > 18
 %files javadoc -f .mfiles-javadoc
-%else
-%files javadoc
-%{_javadocdir}/%{name}/%{submodule_rest}
-%{_javadocdir}/%{name}/%{submodule_commands}
-%{_javadocdir}/%{name}/%{submodule_cli}
-%endif
 
 %changelog
+* Wed Aug 28 2013 Patrick Huang <pahuang@redhat.com> 3.1.1-1
+- Upstream update for newer version of RESTEasy
+
+* Wed Aug 28 2013 Patrick Huang <pahuang@redhat.com> 3.1.0-1
+- Upstream update
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Thu May 16 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-2
 - Change license to LGPLv2+
 

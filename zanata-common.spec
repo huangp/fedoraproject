@@ -7,8 +7,8 @@
 %global submodule_glossary zanata-adapter-glossary
 
 Name:           zanata-%{shortname}
-Version:        2.2.1
-Release:        5%{?dist}
+Version:        3.0.1 
+Release:        1%{?dist}
 Summary:        Zanata common modules
 
 Group:          Development/Libraries
@@ -39,6 +39,7 @@ BuildRequires:  guava
 BuildRequires:  apache-commons-io
 BuildRequires:  apache-commons-codec
 BuildRequires:  junit
+BuildRequires:  xom
 
 # dependencies in zanata-adapter-po
 BuildRequires:  jgettext
@@ -61,6 +62,7 @@ Requires:       jackson
 Requires:       guava
 Requires:       apache-commons-io
 Requires:       apache-commons-codec
+Requires:       xom
 
 Requires:       jgettext
 Requires:       apache-commons-lang
@@ -157,6 +159,12 @@ install -pm 644 %{submodule_glossary}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%
 
 
 %changelog
+* Thu Aug 22 2013 Patrick Huang <pahuang@redhat.com> 3.0.1-1
+- Latest upstream version
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.1-5
 - Minor cosmetic change
 

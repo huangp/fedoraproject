@@ -2,8 +2,8 @@
 %global submodule zanata-common-%{shortname}
 
 Name:           zanata-%{shortname}
-Version:        2.2.0
-Release:        7%{?dist}
+Version:        3.0.1
+Release:        1%{?dist}
 Summary:        Zanata API modules
 
 Group:          Development/Libraries
@@ -63,6 +63,8 @@ This package contains the API documentation for %{submodule}.
 %prep
 %setup -q -n %{name}-%{shortname}-%{version}
 %pom_remove_plugin :maven-dependency-plugin %{submodule}
+%pom_remove_plugin :gmaven-plugin %{submodule}
+%pom_remove_plugin :maven-shade-plugin %{submodule}
 
 %build
 
@@ -110,6 +112,12 @@ install -pm 644 %{submodule}/pom.xml  %{buildroot}%{_mavenpomdir}/JPP-%{submodul
 %endif
 
 %changelog
+* Thu Aug 22 2013 Patrick Huang <pahuang@redhat.com> 3.0.1-1
+- Latest upstream version
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Fri May 3 2013 Patrick Huang <pahuang@redhat.com> 2.2.0-7
 - Remove javadoc subpackage require %{?_isa}
 
